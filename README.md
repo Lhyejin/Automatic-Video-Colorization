@@ -1,6 +1,7 @@
 # Automatic Video Colorization
+**Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity**
 
-Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity : https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
+
 ![alt text](https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity/blob/master/Teaser.PNG)
 
 More results are shown on our project website https://leichenyang.weebly.com/project-color.html
@@ -90,9 +91,8 @@ At last, please arrange your data in the following format:
 
 For the image dataset, please download the ImageNet dataset.
 
-## Citation
-If you use our code or paper, please cite:
-
+### Citation
+original code : https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
 ```
 @InProceedings{Lei_2019_CVPR,
 author = {Lei, Chenyang and Chen, Qifeng},
@@ -102,7 +102,3 @@ month = {June},
 year = {2019}
 }
 ```
-
-## Contact
-If you have any question, please feel free to contact me (Chenyang LEI, leichenyang7@gmail.com)
-
