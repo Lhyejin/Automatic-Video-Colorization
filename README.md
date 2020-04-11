@@ -1,5 +1,5 @@
 # Automatic Video Colorization
-**Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
+**Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity**
 
 
 ![alt text](https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity/blob/master/Teaser.PNG)
