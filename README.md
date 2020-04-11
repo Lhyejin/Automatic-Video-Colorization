@@ -1,6 +1,8 @@
 # Automatic Video Colorization
 
-Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity : https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
+**Code from ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
+
+original code : https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
 ![alt text](https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity/blob/master/Teaser.PNG)
 
 More results are shown on our project website https://leichenyang.weebly.com/project-color.html
