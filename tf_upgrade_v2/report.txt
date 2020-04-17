@@ -1,0 +1,25 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 1 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: test1.py
+--------------------------------------------------------------------------------
+test1.py:67:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'test1.py'
+ outputting to 'test1.py'
+--------------------------------------------------------------------------------
+
+53:9: INFO: Renamed 'tf.train.NewCheckpointReader' to 'tf.compat.v1.train.NewCheckpointReader'
+62:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+63:8: INFO: Renamed 'tf.train.Saver' to 'tf.compat.v1.train.Saver'
+65:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+67:4: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+--------------------------------------------------------------------------------
+
