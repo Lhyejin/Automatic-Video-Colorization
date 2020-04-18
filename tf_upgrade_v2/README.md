@@ -19,3 +19,6 @@ python main_woflow_up.py --model ckpt_woflow --use_gpu 1 --test_dir test_sample0
 
 
 ```
+
+
+***only use main_woflow_up.py, the rest update later***
