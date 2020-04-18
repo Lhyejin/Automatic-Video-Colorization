@@ -4,15 +4,14 @@ from __future__ import division
 from __future__ import print_function
 import os,time,cv2,scipy.io
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
 import numpy as np
-import utils as utils
-import myflowlib as flowlib
-import flow_warp as flow_warp_op
+import utils_up as utils
+import myflowlib_up as flowlib
+import flow_warp_up as flow_warp_op
 import scipy.misc as sic
 import subprocess
-import network as net
-import loss as loss
+import network_up as net
+import loss_up as loss
 import argparse
 from sklearn.neighbors import NearestNeighbors
 
