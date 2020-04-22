@@ -7,13 +7,15 @@ import tensorflow as tf
 import numpy as np
 import utils_up as utils
 import myflowlib_up as flowlib
-import flow_warp_up as flow_warp_op
+# import flow_warp_up as flow_warp_op
+import flow_net
 import scipy.misc as sic
 import subprocess
 import network_up as net
 import loss_up as loss
 import argparse
 from sklearn.neighbors import NearestNeighbors
+tf.compat.v1.disable_eager_execution()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", default='Result_whole', type=str, help="Model Name")
@@ -46,7 +48,8 @@ os.environ["CUDA_VISIBLE_DEVICES"]=str(np.argmax( [int(x.split()[2]) for x in su
 
 
 def occlusion_mask(im0, im1, flow10):
-    warp_im0 = flow_warp_op.flow_warp(im0, flow10)
+#     warp_im0 = flow_warp_op(im0, flow10)
+    warp_im0 = flow_net.tf_warp(im0, flow10, im0.shape[1], im0.shape[2])
     diff = tf.abs(im1 - warp_im0)
     mask = tf.reduce_max(input_tensor=diff, axis=3, keepdims=True)
     mask = tf.less(mask, 0.05)
@@ -114,7 +117,8 @@ with tf.compat.v1.variable_scope(tf.compat.v1.get_variable_scope()):
         C1=net.VCN(utils.build(tf.tile(X1, [1,1,1,3])),reuse=True)        
 
     objDict["mask"],_=occlusion_mask(Y0,Y1,input_flow_backward[:,:,:,0:2])
-    objDict["warped"]=flow_warp_op.flow_warp(C0,input_flow_backward[:,:,:,0:2])
+#     objDict["warped"]=flow_warp_op(C0,input_flow_backward[:,:,:,0:2])
+    objDict["warped"]=flow_net.tf_warp(C0,input_flow_backward[:,:,:,0:2], C0.shape[1], C0.shape[2])
 
     lossDict["RankDiv_im1"]=loss.RankDiverse_loss(C0, tf.tile(input_target[:,:,:,0:3], [1,1,1,div_num]),div_num)
     lossDict["RankDiv_im2"]=loss.RankDiverse_loss(C1, tf.tile(input_target[:,:,:,3:6], [1,1,1,div_num]),div_num)
