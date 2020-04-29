@@ -65,6 +65,7 @@ def VCN(input, channel=32, output_channel=3,reuse=False,ext="",div_num=4):
 def VCRN(input, channel=32, output_channel=3,reuse=False,ext="VCRN"):
     if reuse:
         tf.compat.v1.get_variable_scope().reuse_variables()
+    
     conv1=tf.compat.v1.layers.conv2d(input,channel,[1,1],padding='same', activation=lrelu, kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),name=ext+'r_conv1_1')
     conv1=tf.compat.v1.layers.conv2d(conv1,channel,[3,3],padding='same', activation=lrelu, kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),name=ext+'r_conv1_2')
     pool1=tf.compat.v1.layers.max_pooling2d(conv1, 2, 2, padding='same' )
