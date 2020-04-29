@@ -206,29 +206,29 @@ if is_training:
         cnt=0
         all_RD,all_Bi = 0., 0.
         #Imagenet 데이터 이용해서 bilateral + diversity를 훈련시킴
-#         for id in np.random.permutation(31500):
-#             st=time.time()
-#             color_image=np.float32(scipy.misc.imread("%s/Places365_val_%08d.jpg"%(imgs_dir, id+1)))/255.0
-#             if len(color_image.shape)==2:
-#                 continue
-#             h=color_image.shape[0]//32*32
-#             w=color_image.shape[1]//32*32            
-#             color_image=color_image[:h:2,:w:2,:]
-#             gray_image=cv2.cvtColor(color_image,cv2.COLOR_RGB2GRAY)
-#             if gray_image is None:
-#                 print(id)
-#                 continue
-#             idxs = Bilateral_NN(color_image, neigh)
-#             gray_image=gray_image[:,:,np.newaxis]
+        for id in np.random.permutation(31500):
+            st=time.time()
+            color_image=np.float32(scipy.misc.imread("%s/Places365_val_%08d.jpg"%(imgs_dir, id+1)))/255.0
+            if len(color_image.shape)==2:
+                continue
+            h=color_image.shape[0]//32*32
+            w=color_image.shape[1]//32*32            
+            color_image=color_image[:h:2,:w:2,:]
+            gray_image=cv2.cvtColor(color_image,cv2.COLOR_RGB2GRAY)
+            if gray_image is None:
+                print(id)
+                continue
+            idxs = Bilateral_NN(color_image, neigh)
+            gray_image=gray_image[:,:,np.newaxis]
 
-#             _, crt_RDLoss, crt_BiLoss = sess.run([opt2,lossDict["RankDiv_im1"], lossDict["Bilateral_im1"]],feed_dict={input_i:gray_image[np.newaxis,:,:,[0,0]],\
-#                 input_target:color_image[np.newaxis,:,:,[0,1,2,0,1,2]], input_idx:np.tile(idxs,[1,2])})
-#             cnt+=1
-#             all_RD += crt_RDLoss
-#             all_Bi += crt_BiLoss
-#             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
-#             if cnt>=5000:
-#                 break
+            _, crt_RDLoss, crt_BiLoss = sess.run([opt2,lossDict["RankDiv_im1"], lossDict["Bilateral_im1"]],feed_dict={input_i:gray_image[np.newaxis,:,:,[0,0]],\
+                input_target:color_image[np.newaxis,:,:,[0,1,2,0,1,2]], input_idx:np.tile(idxs,[1,2])})
+            cnt+=1
+            all_RD += crt_RDLoss
+            all_Bi += crt_BiLoss
+            print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
+            if cnt>=5000:
+                break
 
         # Video VCN(Video Colorization Network)
         cnt=0
