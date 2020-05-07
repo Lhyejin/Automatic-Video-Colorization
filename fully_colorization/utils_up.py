@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow as tf
 import os, cv2
-import math,scipy
-import myflowlib as flowlib
-import scipy.misc as sic
+import math, scipy
+import myflowlib_up as flowlib
+from scipy import misc as sic
 # from flownet2.src import flow_warp
 from tensorflow.python.ops import array_ops
 from tensorflow.python.ops import math_ops
@@ -15,7 +15,7 @@ IMG_EXTENSIONS = [
     '.ppm', '.PPM', '.bmp', '.BMP',
 ]
 def check_image(image):
-    assertion = tf.assert_equal(tf.shape(image)[-1], 3, message="image must have 3 color channels")
+    assertion = tf.compat.v1.assert_equal(tf.shape(input=image)[-1], 3, message="image must have 3 color channels")
     with tf.control_dependencies([assertion]):
         image = tf.identity(image)
 
@@ -257,9 +257,9 @@ def gamma(X):
 
 def build_net(ntype,nin,nwb=None,name=None):
     if ntype=='conv':
-        return tf.nn.relu(tf.nn.conv2d(nin,nwb[0],strides=[1,1,1,1],padding='SAME',name=name)+nwb[1])
+        return tf.nn.relu(tf.nn.conv2d(input=nin,filters=nwb[0],strides=[1,1,1,1],padding='SAME',name=name)+nwb[1])
     elif ntype=='pool':
-        return tf.nn.avg_pool(nin,ksize=[1,2,2,1],strides=[1,2,2,1],padding='SAME')
+        return tf.nn.avg_pool2d(input=nin,ksize=[1,2,2,1],strides=[1,2,2,1],padding='SAME')
 
 
 def get_weight_bias(vgg_layers,i):
@@ -271,9 +271,9 @@ def get_weight_bias(vgg_layers,i):
 
 vgg_rawnet=scipy.io.loadmat('VGG_Model/imagenet-vgg-verydeep-19.mat')
 def build_vgg19(input,reuse=False):
-    with tf.variable_scope("vgg19"):
+    with tf.compat.v1.variable_scope("vgg19"):
         if reuse:
-            tf.get_variable_scope().reuse_variables()
+            tf.compat.v1.get_variable_scope().reuse_variables()
         net={}
         vgg_layers=vgg_rawnet['layers'][0]
         net['input']=input-np.array([123.6800, 116.7790, 103.9390]).reshape((1,1,1,3))
@@ -301,25 +301,25 @@ def build(input):
     vgg19_features=build_vgg19(input[:,:,:,0:3]*255.0)
     for layer_id in range(1,6):#6
         vgg19_f = vgg19_features['conv%d_2'%layer_id]
-        input = tf.concat([tf.image.resize_bilinear(vgg19_f,(tf.shape(input)[1],tf.shape(input)[2]))/255.0,input], axis=3)
+        input = tf.concat([tf.image.resize(vgg19_f,(tf.shape(input=input)[1],tf.shape(input=input)[2]), method=tf.image.ResizeMethod.BILINEAR)/255.0,input], axis=3)
     return input
 
 def build_nlayer(input, nlayer):
     vgg19_features=build_vgg19(input[:,:,:,0:3]*255.0)
     for layer_id in range(1,nlayer):#6
         vgg19_f = vgg19_features['conv%d_2'%layer_id]
-        input = tf.concat([tf.image.resize_bilinear(vgg19_f,(tf.shape(input)[1],tf.shape(input)[2]))/255.0,input], axis=3)
+        input = tf.concat([tf.image.resize(vgg19_f,(tf.shape(input=input)[1],tf.shape(input=input)[2]), method=tf.image.ResizeMethod.BILINEAR)/255.0,input], axis=3)
     return input
 
 
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
     shape = input_.get_shape().as_list()
 
-    with tf.variable_scope(scope or "Linear"):
-        matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
-                                 tf.random_normal_initializer(stddev=stddev))
-        bias = tf.get_variable("bias", [output_size],
-            initializer=tf.constant_initializer(bias_start))
+    with tf.compat.v1.variable_scope(scope or "Linear"):
+        matrix = tf.compat.v1.get_variable("Matrix", [shape[1], output_size], tf.float32,
+                                 tf.compat.v1.random_normal_initializer(stddev=stddev))
+        bias = tf.compat.v1.get_variable("bias", [output_size],
+            initializer=tf.compat.v1.constant_initializer(bias_start))
         if with_w:
             return tf.matmul(input_, matrix) + bias, matrix, bias
         else:
@@ -327,12 +327,12 @@ def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=
 def conv_2d(input_, output_dim, 
            k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
            name="conv2d"):
-    with tf.variable_scope(name):
-        w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_dim],
-                            initializer=tf.truncated_normal_initializer(stddev=stddev))
-        conv = tf.nn.conv2d(input_, w, strides=[1, d_h, d_w, 1], padding='SAME')
+    with tf.compat.v1.variable_scope(name):
+        w = tf.compat.v1.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_dim],
+                            initializer=tf.compat.v1.truncated_normal_initializer(stddev=stddev))
+        conv = tf.nn.conv2d(input=input_, filters=w, strides=[1, d_h, d_w, 1], padding='SAME')
 
-        biases = tf.get_variable('biases', [output_dim], initializer=tf.constant_initializer(0.0))
+        biases = tf.compat.v1.get_variable('biases', [output_dim], initializer=tf.compat.v1.constant_initializer(0.0))
         conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
 
         return conv

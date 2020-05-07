@@ -1,7 +1,11 @@
+# +
 import tensorflow as tf
 
+tf.compat.v1.disable_eager_execution()
+# -
+
 _flow_warp_ops = tf.load_op_library(
-    tf.resource_loader.get_path_to_datafile("./lib/flow_warp.so"))
+    tf.compat.v1.resource_loader.get_path_to_datafile("./lib/flow_warp.so"))
 
 
 def flow_warp(image, flow):
