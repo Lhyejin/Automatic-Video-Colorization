@@ -3,6 +3,7 @@ imagenet-vgg-verydeep-19.mat
 ckpt_woflow/
 report.txt
 data/
+*.pytorch
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
