@@ -70,6 +70,7 @@ def Bilateral_NN(color_image, neigh):
 #    idxs = np.zeros([h*w, 5],dtype="int32")
     return idxs
 
+# frame 1개 pair 만들기
 def prepare_input_w_flow(path, num_frames,gray=False):
     file_id=os.path.splitext(os.path.basename(path))[0]
     input_image_src, input_image_target = utils.read_image_sequence(path, num_frames=num_frame)
@@ -187,7 +188,7 @@ if ckpt and continue_training:
     saver_restore.restore(sess,ckpt.model_checkpoint_path)
 
 neigh=NearestNeighbors(n_neighbors=5)
-maxepoch=1001
+maxepoch=100
 num_train=len(train_low)
 print("Number of training images: ", num_train)
 
@@ -201,11 +202,13 @@ if is_training:
         input_list_flow_backward=[None]*num_train
         gray_list_flow_forward=[None]*num_train   
         gray_list_flow_backward=[None]*num_train
-        if os.path.isdir("%s/%04d"%(model,epoch)) and continue_training:
+        # folder는 있는데 파일이 없을 경우도 고려
+        if os.path.isdir("%s/%04d"%(model,epoch)):
             continue
         cnt=0
         all_RD,all_Bi = 0., 0.
         #Imagenet 데이터 이용해서 bilateral + diversity를 훈련시킴
+        # place364_val 이미지는 36500개
         for id in np.random.permutation(31500):
             st=time.time()
             color_image=np.float32(scipy.misc.imread("%s/Places365_val_%08d.jpg"%(imgs_dir, id+1)))/255.0
@@ -227,7 +230,9 @@ if is_training:
             all_RD += crt_RDLoss
             all_Bi += crt_BiLoss
             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
-            if cnt>=5000:
+            # if cnt>=5000:
+            #     break
+            if cnt>=1:
                 break
 
         # Video VCN(Video Colorization Network)
