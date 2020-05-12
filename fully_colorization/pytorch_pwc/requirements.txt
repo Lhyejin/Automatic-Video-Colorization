@@ -1,5 +1,5 @@
 certifi==2020.4.5.1
-cupy==7.4.0
+cupy-cuda100==7.4.0
 cycler==0.10.0
 fastrlock==0.4
 future==0.18.2
