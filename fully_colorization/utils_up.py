@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
 import os, cv2
@@ -49,7 +50,7 @@ Return: gray_images, color_images
 def read_image_sequence(filename, num_frames):
     file1 = os.path.splitext(os.path.basename(filename))[0]
     ext = os.path.splitext(os.path.basename(filename))[1]
-
+    print('utils filename', filename)
     try:
         img1 = sic.imread(filename).astype(np.float32)
         imgh1 = img1
@@ -68,6 +69,7 @@ def read_image_sequence(filename, num_frames):
        # t+1 프레임
         filei = int(file1[-6:]) + i + 1
         filenamei = os.path.split(filename)[0] + "/" + file1[:-6] + "{:>06}".format(filei).format() + ext
+        print('filename 다음번 프레임', filenamei)
         try:
             imgi = sic.imread(filenamei).astype(np.float32)
             imghi = imgi
@@ -167,8 +169,11 @@ def read_flow_sequence(filename, num_frames):
             flow_forward = flowlib.read_flow(folder+"/Forward/{:>04}".format(filej).format()+"_"+"{:>04}".format(filei).format()+".flo")
             flow_backward = flowlib.read_flow(folder+"/Backward/{:>04}".format(filei).format()+"_"+"{:>04}".format(filej).format()+".flo")
         else:
-            flow_forward = flowlib.read_flow(folder+"/Forward"+"/"+file1[:-6]+"{:>06}".format(filej).format()+"_"+file1[:-6]+"{:>06}".format(filei).format()+".flo")
-            flow_backward = flowlib.read_flow(folder+"/Backward"+"/"+file1[:-6]+"{:>06}".format(filei).format()+"_"+file1[:-6]+"{:>06}".format(filej).format()+".flo")
+            try:
+                flow_forward = flowlib.read_flow(folder+"/Forward"+"/"+file1[:-6]+"{:>06}".format(filej).format()+"_"+file1[:-6]+"{:>06}".format(filei).format()+".flo")
+                flow_backward = flowlib.read_flow(folder+"/Backward"+"/"+file1[:-6]+"{:>06}".format(filei).format()+"_"+file1[:-6]+"{:>06}".format(filej).format()+".flo")
+            except:
+                return None, None
         filej = filei
         if i == 0:
             flow_forward_seq = flow_forward

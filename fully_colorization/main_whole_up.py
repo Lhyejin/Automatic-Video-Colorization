@@ -28,7 +28,7 @@ parser.add_argument("--test_root", default="./data/test/JPEGImages/480p/", type=
 parser.add_argument("--imgs_dir", default='./data/Imagenet/val_256', type=str, help="Test dir path")
 parser.add_argument("--is_training", default=1, type=int, help="Training or test")
 parser.add_argument("--continue_training", default=1, type=int, help="Restore checkpoint")
-
+parser.add_argument("--epoch", default=100, type=int, help="training epoch")
 
 ARGS = parser.parse_args()
 print(ARGS)
@@ -43,6 +43,7 @@ is_training=ARGS.is_training
 continue_training=ARGS.continue_training
 imgs_dir = ARGS.imgs_dir
 num_frame = 2 # number of read in frames
+maxepoch= ARGS.epoch # training epoch
 
 
 os.environ["CUDA_VISIBLE_DEVICES"]=str(np.argmax( [int(x.split()[2]) for x in subprocess.Popen("nvidia-smi -q -d Memory | grep -A4 GPU | grep Free", shell=True, stdout=subprocess.PIPE).stdout.readlines()]))
@@ -77,11 +78,13 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     if input_image_target is None:
         return None, None, None, None
     if not gray:
-        input_flow_forward,input_flow_backward = utils.read_flow_sequence(path.replace("JPEGImages","FLOWImages"), num_frames=num_frame)
+        input_flow_forward,input_flow_backward = utils.read_flow_sequence(path.replace("korea_data","FLOWImages"), num_frames=num_frame)
     else:
-        input_flow_forward,input_flow_backward = utils.read_flow_sequence(path.replace("JPEGImages","FLOWImages_GRAY"), num_frames=num_frame)        
+        input_flow_forward,input_flow_backward = utils.read_flow_sequence(path.replace("korea_data","FLOWImages_GRAY"), num_frames=num_frame)        
     h=input_image_src.shape[0]//32*32
     w=input_image_src.shape[1]//32*32
+    if input_flow_forward is None:
+        return None, None, None, None
     return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
         np.float32(np.expand_dims(input_image_target[:h:2,:w:2,:],axis=0)),\
         np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
@@ -188,7 +191,6 @@ if ckpt and continue_training:
     saver_restore.restore(sess,ckpt.model_checkpoint_path)
 
 neigh=NearestNeighbors(n_neighbors=5)
-maxepoch=100
 num_train=len(train_low)
 print("Number of training images: ", num_train)
 
@@ -209,9 +211,10 @@ if is_training:
         all_RD,all_Bi = 0., 0.
         #Imagenet 데이터 이용해서 bilateral + diversity를 훈련시킴
         # place364_val 이미지는 36500개
+        # coco는 82782개
         for id in np.random.permutation(31500):
             st=time.time()
-            color_image=np.float32(scipy.misc.imread("%s/Places365_val_%08d.jpg"%(imgs_dir, id+1)))/255.0
+            color_image=np.float32(scipy.misc.imread("%s/%08d.jpg"%(imgs_dir, id+1)))/255.0
             if len(color_image.shape)==2:
                 continue
             h=color_image.shape[0]//32*32
@@ -230,10 +233,10 @@ if is_training:
             all_RD += crt_RDLoss
             all_Bi += crt_BiLoss
             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
-            # if cnt>=5000:
-            #     break
-            if cnt>=1:
+            if cnt>=5000:
                 break
+#             if cnt>=100:
+#                 break
 
         # Video VCN(Video Colorization Network)
         cnt=0
@@ -296,6 +299,8 @@ if is_training:
                     flag=True
                     continue
                 st=time.time()
+                # C0_imall, C1_imall은 가로로 이어붙인 결과들 [:,h,w*4,3]
+                # C0_im, C1_im는 channel에 concat한 결과 [:,h,w,12]
                 C0_imall,C1_imall,C0_im, C1_im, warped,mask=sess.run([objDict["prediction_0"],objDict["prediction_1"],C0, C1,objDict["warped"],objDict['mask']],feed_dict={input_i:input_image_src,
                     input_target:input_image_target,
                     input_flow_backward:input_flow_backward_src
@@ -319,8 +324,7 @@ if is_training:
                 sic.imsave("%s/%04d/predictions/predictions_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(C0_imall[0] * 255.0,255.0),0.0)))
                 
                 saver.save(sess,"%s/model.ckpt"%model)
-            if epoch%10==0:
-               saver.save(sess,"%s/%04d/model.ckpt"%(model,epoch))
+            saver.save(sess,"%s/%04d/model.ckpt"%(model,epoch))
 
 # Inference
 else:
@@ -329,7 +333,8 @@ else:
     print(test_low[0])
     out_folder = test_dir.split('/')[-1]
     outputs= [None]*4
-    for ind in range(numtest):
+    # for ind in range(numtest):
+    for ind in range(10):
         input_image_src, input_image_target, input_flow_forward_src, input_flow_backward_src = prepare_input_w_flow(test_low[ind],num_frames=num_frame,gray=True)
         if input_image_src is None or input_image_target is None or input_flow_forward_src is None:
             print("Not able to read the images/flows.")
