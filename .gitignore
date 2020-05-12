@@ -6,6 +6,7 @@ data/
 model/
 *.pytorch
 Result_whole/
+*.flo
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
