@@ -68,9 +68,9 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     w=input_image_src.shape[1]//32*32
     if input_flow_forward is None:
         return None, None, None
-    return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
-        np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
-        np.expand_dims(input_flow_backward[:h:2,:w:2,:],axis=0)/2.0
+    return np.float32(np.expand_dims(input_image_src[:h,:w,:],axis=0)),\
+        np.expand_dims(input_flow_forward[:h,:w,:],axis=0)/2.0,\
+        np.expand_dims(input_flow_backward[:h,:w,:],axis=0)/2.0
 
 
 config=tf.compat.v1.ConfigProto()
@@ -137,34 +137,30 @@ outputs= [None]*4
 
 if is_image:
     for ind in range(numtest):
-        input_image_src, input_flow_forward_src, input_flow_backward_src = prepare_input_w_flow(test_low[ind],num_frames=num_frame,gray=True)
-        if input_image_src is None or input_flow_forward_src is None or input_flow_backward_src is None:
-            print("Not able to read the images/flows.")
-            continue
+        # Read Image
+        im=np.float32(scipy.misc.imread(test_low[ind], 'L'))/255.0
+
+        # image crop (32배로)
+        h=im.shape[0]//32*32
+        w=im.shape[1]//32*32
+        im=im[np.newaxis,:h,:w,np.newaxis]
+
         st=time.time()
 
-        C0_im, C1_im=sess.run([C0, C1],feed_dict={input_i:input_image_src,
-            input_flow_backward:input_flow_backward_src
-            })
+        # colorization C0
+        C0_im=sess.run(C0,feed_dict={input_i:np.concatenate((im,im),axis=3)})
         print("test time for %s --> %.3f"%(ind, time.time()-st))
         h,w = C0_im.shape[1:3]
         if not os.path.isdir("%s/%s" % (model, out_folder)):
-            os.makedirs("%s/%s/predictions" % (model, out_folder))
             os.makedirs("%s/%s/predictions0" % (model, out_folder))
             os.makedirs("%s/%s/predictions1" % (model, out_folder))
             os.makedirs("%s/%s/predictions2" % (model, out_folder))
             os.makedirs("%s/%s/predictions3" % (model, out_folder))
 
-        # refine network
-        # 처음프레임에는 두장의 이미지 넣어주고, 그 뒤로는 예측한 output과 그 다음 프레임을 넣어줘서 다음 프레임을 정제함.
         for ref_i in range(4):
-            output= sess.run([final_r1],feed_dict={c0:C0_im[:,:,:,ref_i*3:ref_i*3+3], c1:C1_im[:,:,:,ref_i*3:ref_i*3+3], \
-                    input_i:input_image_src,\
-                    gray_flow_backward:input_flow_backward_src, input_flow_backward:input_flow_backward_src})
-            outputs[ref_i] = output
             sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind),np.uint8(np.maximum(np.minimum(C0_im[0,:,:,ref_i*3:ref_i*3+3] * 255.0,255.0),0.0)))
-            sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind+1),np.uint8(np.maximum(np.minimum(output[0,:,:,:] * 255.0,255.0),0.0)))
-        sic.imsave("%s/%s/predictions/final_%06d.jpg"%(model, out_folder, ind+1),np.uint8(np.maximum(np.minimum(np.concatenate(outputs,axis=2)[0,:,:,:] * 255.0,255.0),0.0)))
+            
+        
 else:
     for ind in range(numtest-1):
         input_image_src, input_flow_forward_src, input_flow_backward_src = prepare_input_w_flow(test_low[ind],num_frames=num_frame,gray=True)
@@ -179,7 +175,6 @@ else:
         print("test time for %s --> %.3f"%(ind, time.time()-st))
         h,w = C0_im.shape[1:3]
         if not os.path.isdir("%s/%s" % (model, out_folder)):
-            os.makedirs("%s/%s/predictions" % (model, out_folder))
             os.makedirs("%s/%s/predictions0" % (model, out_folder))
             os.makedirs("%s/%s/predictions1" % (model, out_folder))
             os.makedirs("%s/%s/predictions2" % (model, out_folder))
@@ -195,7 +190,6 @@ else:
                 outputs[ref_i] = output
                 sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind),np.uint8(np.maximum(np.minimum(C0_im[0,:,:,ref_i*3:ref_i*3+3] * 255.0,255.0),0.0)))
                 sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind+1),np.uint8(np.maximum(np.minimum(output[0,:,:,:] * 255.0,255.0),0.0)))
-            sic.imsave("%s/%s/predictions/final_%06d.jpg"%(model, out_folder, ind+1),np.uint8(np.maximum(np.minimum(np.concatenate(outputs,axis=2)[0,:,:,:] * 255.0,255.0),0.0)))
 
         else:
             for ref_i in range(4):

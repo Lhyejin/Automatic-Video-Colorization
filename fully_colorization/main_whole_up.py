@@ -85,10 +85,16 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     w=input_image_src.shape[1]//32*32
     if input_flow_forward is None:
         return None, None, None, None
-    return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
-        np.float32(np.expand_dims(input_image_target[:h:2,:w:2,:],axis=0)),\
-        np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
-        np.expand_dims(input_flow_backward[:h:2,:w:2,:],axis=0)/2.0
+    
+    # 크기를 0.5배로 줄임 - OOM떄문에?
+    # return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
+    #     np.float32(np.expand_dims(input_image_target[:h:2,:w:2,:],axis=0)),\
+    #     np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
+    #     np.expand_dims(input_flow_backward[:h:2,:w:2,:],axis=0)/2.0
+    return np.float32(np.expand_dims(input_image_src[:h,:w,:],axis=0)),\
+        np.float32(np.expand_dims(input_image_target[:h,:w,:],axis=0)),\
+        np.expand_dims(input_flow_forward[:h,:w,:],axis=0),\
+        np.expand_dims(input_flow_backward[:h,:w,:],axis=0)
 
 config=tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth=True
