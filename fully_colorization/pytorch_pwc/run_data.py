@@ -33,16 +33,20 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model", default='network-default.pytorch', type=str, help="model path")
 parser.add_argument("--in_dir", default='./data/input', type=str, help="input data folder name")
 parser.add_argument("--out_dir", default='./data', type=str, help="root folder name to store output")
+parser.add_argument("--grayscale", action='store_true', default=False, help="grayscale trigger / default is color image")
 
 args = parser.parse_args()
+
 model_path = args.model
 in_dir = args.in_dir
 out_dir = args.out_dir
+grayscale = args.grayscale
+
 if not os.path.isdir('%s/Forward'%out_dir):
     os.makedirs('%s/Forward'%out_dir)
 if not os.path.isdir('%s/Backward'%out_dir):
     os.makedirs('%s/Backward'%out_dir)
-    
+
 
 # +
 # end
@@ -327,8 +331,12 @@ if __name__ == '__main__':
     # frame 이름들 list 뽑아오기
     image_names = get_names(in_dir)
     for i in range(len(image_names)-1):
-        tenFirst = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i]))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
-        tenSecond = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i+1]))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
+        if grayscale:
+            tenFirst = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i]).convert('L').convert('RGB'))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
+            tenSecond = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i+1]).convert('L').convert('RGB'))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
+        else:
+            tenFirst = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i]))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
+            tenSecond = torch.FloatTensor(numpy.ascontiguousarray(numpy.array(PIL.Image.open(image_names[i+1]))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
 
         success, forward_tenOutput = estimate(tenFirst, tenSecond)
         success, backward_tenOutput = estimate(tenSecond, tenFirst)

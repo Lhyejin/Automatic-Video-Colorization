@@ -1,5 +1,6 @@
 import argparse
-import os
+import os, sys
+sys.path.append('..')
 import subprocess
 from pathlib import Path
 from pytorch_pwc.utils import get_names

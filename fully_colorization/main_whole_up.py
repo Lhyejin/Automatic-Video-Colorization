@@ -210,9 +210,9 @@ if is_training:
         cnt=0
         all_RD,all_Bi = 0., 0.
         #Imagenet 데이터 이용해서 bilateral + diversity를 훈련시킴
-        # place364_val 이미지는 36500개
-        # coco는 82782개
-        for id in np.random.permutation(31500):
+        # place364_val 이미지는 36500개 - 31500
+        # coco는 82782개 - 77782
+        for id in np.random.permutation(77782):
             st=time.time()
             color_image=np.float32(scipy.misc.imread("%s/%08d.jpg"%(imgs_dir, id+1)))/255.0
             if len(color_image.shape)==2:
@@ -323,7 +323,7 @@ if is_training:
                 sic.imsave("%s/%04d/predictions/final_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(output[0] * 255.0,255.0),0.0)))
                 sic.imsave("%s/%04d/predictions/predictions_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(C0_imall[0] * 255.0,255.0),0.0)))
                 
-                saver.save(sess,"%s/model.ckpt"%model)
+            saver.save(sess,"%s/model.ckpt"%model)
             saver.save(sess,"%s/%04d/model.ckpt"%(model,epoch))
 
 # Inference

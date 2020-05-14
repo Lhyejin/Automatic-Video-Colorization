@@ -1,4 +1,5 @@
-import os, cv2
+import os, cv2, sys
+sys.path.append('..')
 from pytorch_pwc.utils import get_names
 
 img_dir = 'data/Imagenet/val_256/'

@@ -50,7 +50,6 @@ Return: gray_images, color_images
 def read_image_sequence(filename, num_frames):
     file1 = os.path.splitext(os.path.basename(filename))[0]
     ext = os.path.splitext(os.path.basename(filename))[1]
-    print('utils filename', filename)
     try:
         img1 = sic.imread(filename).astype(np.float32)
         imgh1 = img1
@@ -69,7 +68,6 @@ def read_image_sequence(filename, num_frames):
        # t+1 프레임
         filei = int(file1[-6:]) + i + 1
         filenamei = os.path.split(filename)[0] + "/" + file1[:-6] + "{:>06}".format(filei).format() + ext
-        print('filename 다음번 프레임', filenamei)
         try:
             imgi = sic.imread(filenamei).astype(np.float32)
             imghi = imgi
@@ -160,7 +158,6 @@ def read_flow_sequence(filename, num_frames):
     file1 = os.path.splitext(os.path.basename(filename))[0]
     folder = os.path.split(filename)[0]
     ext = os.path.splitext(os.path.basename(filename))[1]
-
     filej = int(file1[-6:])
     for i in range(num_frames-1):
         filei = filej + i + 1

@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+sys.path.append('..')
 from pathlib import Path
 from pytorch_pwc.utils import get_names
 
@@ -9,7 +10,7 @@ from pytorch_pwc.utils import get_names
 def extract_video_frames(input_path):
     path = Path(input_path)
 
-    frames_dir = os.path.join(path.parent, "korea_data")
+    frames_dir = os.path.join(path.parent, "frames")
     # Make a folder for the frames, if the folder does not already exist
     os.makedirs(frames_dir, exist_ok=True)
 

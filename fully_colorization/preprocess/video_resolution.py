@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+sys.path.append('..')
 from pathlib import Path
 from pytorch_pwc.utils import get_names
 # scale video에 저장

@@ -57,7 +57,6 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     filename = os.path.basename(path)
     input_image_src, _ = utils.read_image_sequence(path, num_frames=num_frame)
 
-
     if not gray:
         input_flow_forward, input_flow_backward = \
         utils.read_flow_sequence(os.path.join(flow_root_dir,"FLOWImages", filename), num_frames=num_frame)
@@ -68,7 +67,7 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     h=input_image_src.shape[0]//32*32
     w=input_image_src.shape[1]//32*32
     if input_flow_forward is None:
-        return None, None, None, None
+        return None, None, None
     return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
         np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
         np.expand_dims(input_flow_backward[:h:2,:w:2,:],axis=0)/2.0
