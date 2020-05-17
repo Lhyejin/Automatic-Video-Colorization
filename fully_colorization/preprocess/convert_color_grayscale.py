@@ -13,10 +13,8 @@ args = parser.parse_args()
 
 input_path = args.input_dir
 output_path = args.output_dir
+makedirs(output_path, exist_ok=True)
 
-os.makedirs(output_path, exist_ok=True)
-
-makedirs('data/korea_gray', exist_ok=True)
 files = [f for f in listdir(input_path) if isfile(join(input_path, f))]
 for file_name in files:
     image = Image.open(join(input_path, file_name)).convert('L')

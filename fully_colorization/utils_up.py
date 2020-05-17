@@ -215,6 +215,7 @@ def read_flow_sintel(filename, num_frames, substr="clean"):
 
 def read_image_path(file_path):
     path_all=[]
+    print(file_path)
     for dirname in file_path:
         for root, dir, fnames in sorted(os.walk(dirname)):
             for fname in sorted(fnames):
