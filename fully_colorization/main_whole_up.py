@@ -31,6 +31,8 @@ parser.add_argument("--is_training", default=1, type=int, help="Training or test
 parser.add_argument("--continue_training", default=1, type=int, help="Restore checkpoint")
 parser.add_argument("--epoch", default=100, type=int, help="training epoch")
 parser.add_argument("--knn-k", default=5, type=int, help='K-nearest neighbor k default=5')
+parser.add_argument("--max-image-time", default=5000, type=int, help='max image time step per epoch / default=5000')
+parser.add_argument("--max-video-time", default=1000, type=int, help='max video time step per epoch / default=1000')
 ARGS = parser.parse_args()
 print(ARGS)
 
@@ -47,6 +49,8 @@ flow_root_dir = ARGS.flow_root_dir
 num_frame = 2 # number of read in frames
 maxepoch= ARGS.epoch # training epoch
 knn_k = ARGS.knn_k
+max_image_time = ARGS.max_image_time
+max_video_time = ARGS.max_video_time
 
 os.environ["CUDA_VISIBLE_DEVICES"]=str(np.argmax( [int(x.split()[2]) for x in subprocess.Popen("nvidia-smi -q -d Memory | grep -A4 GPU | grep Free", shell=True, stdout=subprocess.PIPE).stdout.readlines()]))
 
@@ -235,7 +239,7 @@ if is_training:
             all_RD += crt_RDLoss
             all_Bi += crt_BiLoss
             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
-            if cnt>=3000:
+            if cnt>=max_image_time:
                 break
 #             if cnt>=1:
 #                 break
@@ -282,7 +286,7 @@ if is_training:
                            input_idx: np.concatenate([idxs1,idxs2],axis=1)})
                 print("iter: %d %d || Refine || loss: %.4f %.4f"%(epoch,cnt,out_loss,time.time()-st))
 
-            if cnt>=2000:
+            if cnt>=max_video_time:
                 break
 
         # Validation
