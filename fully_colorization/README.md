@@ -2,12 +2,11 @@
 
 
 ### Requirement
-require packages : environment.yml or conda-gpu-cuda10.yml
+require packages : environment.yml or conda-gpu-cuda10.yml (in preprocess folder)
 we tested on Cuda 10.0 + cudnn 7.5 + T4
 
 ```
 $conda env create -f environment.yml or conda_gpu_cuda10.yml
-
 ```
 
 
