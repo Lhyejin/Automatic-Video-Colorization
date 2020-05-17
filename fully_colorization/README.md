@@ -1,5 +1,8 @@
 ## tensorflow 2.0 version (use tf.compat.v1)
 
+### prepare
+optical flow 추출
+
 ### Requirement
 require packages : environment.yml or conda-gpu-cuda10.yml
 we tested on Cuda 10.0 + cudnn 7.5 + T4
@@ -20,5 +23,7 @@ python main_woflow_up.py --model ckpt_woflow --use_gpu 1 --test_dir test_sample0
 
 ```
 
-
-***only use main_woflow_up.py, the rest update later***
+training main_whole.py
+```
+python main_whole.py
+```
