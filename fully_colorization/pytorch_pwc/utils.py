@@ -4,10 +4,11 @@ import numpy
 
 # +
 def get_names(dir='./'):
-    old_names = os.popen("ls %s"%dir).readlines()
+    old_names = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+    old_names.sort()
     new_names = [None]*len(old_names)
     for idx in range(len(old_names)):
-        new_names[idx] = dir+'/'+old_names[idx][:-1]
+        new_names[idx] =os.path.join(dir,old_names[idx])
     return new_names
 
 
