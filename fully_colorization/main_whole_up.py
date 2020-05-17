@@ -198,10 +198,9 @@ neigh=NearestNeighbors(n_neighbors=knn_k)
 num_train=len(train_low)
 print("Number of training images: ", num_train)
 
-# +
 print("is_training: ", is_training )
 if is_training:
-    for epoch in range(57,maxepoch):
+    for epoch in range(0,maxepoch):
         print("Processing epoch %d"%epoch)
         input_list_src=[None]*num_train
         input_list_target=[None]*num_train
@@ -327,9 +326,6 @@ if is_training:
                 sic.imsave("%s/%04d/predictions/mask_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(np.concatenate([out_cmap_C[0],out_cmap_X[0],out_low_conf_mask[0]],axis=1)* 255.0,255.0),0.0)))
                 sic.imsave("%s/%04d/predictions/final_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(output[0] * 255.0,255.0),0.0)))
                 sic.imsave("%s/%04d/predictions/predictions_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(C0_imall[0] * 255.0,255.0),0.0)))
-
-            
-# -
 
 # Inference
 else:
