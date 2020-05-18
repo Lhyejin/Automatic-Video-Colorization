@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # + {}
-#tensorflow 1.2.0 is needed
 # colorization network에 temparal loss function 뺐음.
 # warping할 때, backward warp이 아닌 forward로 바꿈. t->t+1에는 forward warp가 필요함.
 
@@ -36,6 +35,8 @@ parser.add_argument("--is_training", default=1, type=int, help="Training or test
 parser.add_argument("--continue_training", default=1, type=int, help="Restore checkpoint")
 parser.add_argument("--epoch", default=100, type=int, help="training epoch")
 parser.add_argument("--knn-k", default=5, type=int, help='K-nearest neighbor k default=5')
+parser.add_argument("--max-image-step", default=5000, type=int, help='image training time step for one epoch')
+parser.add_argument("--max-video-step", default=1000, type=int, help='video training time step for one epoch')
 ARGS = parser.parse_args()
 print(ARGS)
 
@@ -52,7 +53,8 @@ flow_root_dir = ARGS.flow_root_dir
 num_frame = 2 # number of read in frames
 maxepoch= ARGS.epoch # training epoch
 knn_k = ARGS.knn_k
-
+max_image_step = ARGS.max_image_step
+max_video_step = ARGS.max_video_step
 os.environ["CUDA_VISIBLE_DEVICES"]=str(np.argmax( [int(x.split()[2]) for x in subprocess.Popen("nvidia-smi -q -d Memory | grep -A4 GPU | grep Free", shell=True, stdout=subprocess.PIPE).stdout.readlines()]))
 
 
@@ -235,10 +237,8 @@ if is_training:
             all_RD += crt_RDLoss
             all_Bi += crt_BiLoss
             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
-            if cnt>=5000:
+            if cnt>=max_image_step:
                 break
-#             if cnt>=100:
-#                 break
 
         # Video VCN(Video Colorization Network)
         cnt=0
@@ -264,7 +264,7 @@ if is_training:
             all_loss += out_loss["total"]
 
             cnt+=1
-            print("iter: %d %d %.2fs loss: %.4f %.4f|| (D1) %.4f %.4f (D2) %.4f %.4f || (B1) %.4f %.4f (B2) %.4f %.4f (T) %.4f %.4f"\
+            print("iter: %d %d %.2fs loss: %.4f %.4f|| (D1) %.4f %.4f (D2) %.4f %.4f || (B1) %.4f %.4f (B2) %.4f %.4f" \
                 %(epoch,cnt,out_loss["total"],all_loss/cnt, time.time()-st,\
                     out_loss["RankDiv_im1"], all_D1/cnt, out_loss["RankDiv_im2"], all_D2/cnt,\
                     out_loss["Bilateral_im1"], all_B1/cnt, out_loss["Bilateral_im2"], all_B2/cnt))
@@ -279,7 +279,7 @@ if is_training:
                            input_idx: np.concatenate([idxs1,idxs2],axis=1)})
                 print("iter: %d %d || Refine || loss: %.4f %.4f"%(epoch,cnt,out_loss,time.time()-st))
 
-            if cnt>=1000:
+            if cnt>=max_video_step:
                 break
 
         # Validation
@@ -309,7 +309,7 @@ if is_training:
                 for ref_i in range(4):
                     output, out_cmap_C, out_cmap_X, out_low_conf_mask = sess.run([final_r1, cmap_C,cmap_X,low_conf_mask],feed_dict={c0:C0_im[:,:,:,ref_i*3:ref_i*3+3], c1:C1_im[:,:,:,ref_i*3:ref_i*3+3], \
                            input_i:input_image_src, input_target:input_image_target, \
-                           gray_flow_forward:gray_flow_forward_src,\ 
+                           gray_flow_forward:gray_flow_forward_src, \
                            gray_flow_backward:gray_flow_backward_src, input_flow_backward:input_flow_backward_src})
 
                     outputs.append(output[0,:,:,:])

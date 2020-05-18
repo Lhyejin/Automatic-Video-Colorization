@@ -104,7 +104,7 @@ train_low=utils.read_image_path(train_root)
 test_low=utils.read_image_path(test_root)
 
 
-input_idx=tf.compat.v1.placeholder(tf.int32,shape=[None,5*num_frame])
+input_idx=tf.compat.v1.placeholder(tf.int32,shape=[None,knn_k*num_frame])
 input_i=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,1*num_frame])
 input_target=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,3*num_frame])
 input_flow_forward=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,2*(num_frame-1)])
