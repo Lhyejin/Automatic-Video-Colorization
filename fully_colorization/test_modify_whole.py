@@ -68,9 +68,9 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     w=input_image_src.shape[1]//32*32
     if input_flow_forward is None:
         return None, None, None
-    return np.float32(np.expand_dims(input_image_src[:h,:w,:],axis=0)),\
-        np.expand_dims(input_flow_forward[:h,:w,:],axis=0)/2.0,\
-        np.expand_dims(input_flow_backward[:h,:w,:],axis=0)/2.0
+    return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
+        np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
+        np.expand_dims(input_flow_backward[:h:2,:w:2,:],axis=0)/2.0
 
 
 config=tf.compat.v1.ConfigProto()
@@ -102,8 +102,8 @@ with tf.compat.v1.variable_scope(tf.compat.v1.get_variable_scope()):
 
 
     #-------------RefineNet---------------#
-    cmap_C, warp_C0 = occlusion_mask(c0, c1, gray_flow_backward[:,:,:,0:2])
-    cmap_X, warp_X0 = occlusion_mask(tf.tile(input_i[:,:,:,0:1], [1,1,1,3]), tf.tile(input_i[:,:,:,1:2],[1,1,1,3]),gray_flow_backward[:,:,:,0:2])
+    cmap_C, warp_C0 = occlusion_mask(c0, c1, gray_flow_forward[:,:,:,0:2])
+    cmap_X, warp_X0 = occlusion_mask(tf.tile(input_i[:,:,:,0:1], [1,1,1,3]), tf.tile(input_i[:,:,:,1:2],[1,1,1,3]),gray_flow_forward[:,:,:,0:2])
     low_conf_mask = tf.cast(tf.greater(cmap_X - cmap_C, 0), tf.float32)
     
     coarse_C1 = c1*(-low_conf_mask+1) + tf.tile(input_i[:,:,:,1:2],[1,1,1,3])*low_conf_mask
@@ -186,7 +186,7 @@ else:
             for ref_i in range(4):
                 output= sess.run(final_r1,feed_dict={c0:C0_im[:,:,:,ref_i*3:ref_i*3+3], c1:C1_im[:,:,:,ref_i*3:ref_i*3+3], \
                         input_i:input_image_src,\
-                        gray_flow_backward:input_flow_backward_src, input_flow_backward:input_flow_backward_src})
+                        gray_flow_forward:input_flow_forward_src, input_flow_backward:input_flow_backward_src})
                 outputs[ref_i] = output
                 sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind),np.uint8(np.maximum(np.minimum(C0_im[0,:,:,ref_i*3:ref_i*3+3] * 255.0,255.0),0.0)))
                 sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind+1),np.uint8(np.maximum(np.minimum(output[0,:,:,:] * 255.0,255.0),0.0)))
@@ -195,6 +195,6 @@ else:
             for ref_i in range(4):
                 output = sess.run(final_r1,feed_dict={c0:outputs[ref_i], c1:C1_im[:,:,:,:3], \
                         input_i:input_image_src, \
-                        gray_flow_backward:input_flow_backward_src, input_flow_backward:input_flow_backward_src})
+                        gray_flow_forward:input_flow_forward_src, input_flow_backward:input_flow_backward_src})
                 outputs.append(output[0,:,:,:])
                 sic.imsave("%s/%s/predictions%d/final_%06d.jpg"%(model, out_folder, ref_i, ind+1),np.uint8(np.maximum(np.minimum(output[0,:,:,:] * 255.0,255.0),0.0)))

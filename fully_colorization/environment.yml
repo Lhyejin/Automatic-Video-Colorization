@@ -1,5 +1,5 @@
 name: color
-channels:
+hannels:
   - defaults
   - conda-forge
 dependencies:
@@ -129,5 +129,4 @@ dependencies:
     - urllib3==1.25.9
     - werkzeug==1.0.1
     - wrapt==1.12.1
-prefix: /opt/conda/envs/color
 

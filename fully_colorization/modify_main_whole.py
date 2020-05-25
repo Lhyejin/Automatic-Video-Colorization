@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# + {}
+# +
 # colorization network에 temparal loss function 뺐음.
 # warping할 때, backward warp이 아닌 forward로 바꿈. t->t+1에는 forward warp가 필요함.
 
@@ -25,10 +25,10 @@ tf.compat.v1.disable_eager_execution()
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", default='Result_whole', type=str, help="Model Name")
 parser.add_argument("--div_num", default=4, type=int, help="diverse num")
-parser.add_argument("--save_freq", default=1, type=int, help="save frequency")
+parser.add_argument("--save_freq", default=5, type=int, help="save frequency")
 parser.add_argument("--test_dir", default='./data/test/JPEGImages/480p/cows', type=str, help="Test dir path")
 parser.add_argument("--train_root", default="./data/train/JPEGImages/480p/", type=str, help="training dir path")
-parser.add_argument("--test_root", default="./data/test/frame2/", type=str, help="Test dir path")
+parser.add_argument("--test_root", default="./data/test/walking/", type=str, help="Test dir path")
 parser.add_argument("--imgs_dir", default='./data/Imagenet/coco', type=str, help="train image dir path.")
 parser.add_argument("--flow-root-dir", default='./data', type=str, help='root path of flow dir. defulat=./data')
 parser.add_argument("--is_training", default=1, type=int, help="Training or test")
@@ -59,7 +59,6 @@ os.environ["CUDA_VISIBLE_DEVICES"]=str(np.argmax( [int(x.split()[2]) for x in su
 
 
 def occlusion_mask(im0, im1, flow10):
-#     warp_im0 = flow_warp_op(im0, flow10)
     warp_im0 = tfa.image.dense_image_warp(im0, flow10, name='occlusion_warp')
     # im0의 channel이 무조건 3이라는 가정하에
     warp_im0.set_shape([None, None, None, 3])
@@ -95,7 +94,6 @@ def prepare_input_w_flow(path, num_frames,gray=False):
     if input_flow_forward is None:
         return None, None, None, None
     
-    # 크기를 0.5배로 줄임 - OOM떄문에?
     return np.float32(np.expand_dims(input_image_src[:h:2,:w:2,:],axis=0)),\
         np.float32(np.expand_dims(input_image_target[:h:2,:w:2,:],axis=0)),\
         np.expand_dims(input_flow_forward[:h:2,:w:2,:],axis=0)/2.0,\
@@ -106,7 +104,7 @@ config.gpu_options.allow_growth=True
 sess=tf.compat.v1.Session(config=config)
 train_low=utils.read_image_path(train_root)
 test_low=utils.read_image_path(test_root)
-
+print('test_low',test_low)
 
 input_idx=tf.compat.v1.placeholder(tf.int32,shape=[None,5*num_frame])
 input_i=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,1*num_frame])
@@ -216,7 +214,8 @@ if is_training:
         #Imagenet 데이터 이용해서 bilateral + diversity를 훈련시킴
         # place364_val 이미지는 36500개 - 31500
         # coco는 82782개 - 77782
-        for id in np.random.permutation(77782):
+        # coco - 118286 - 5000 = 113286
+        for id in np.random.permutation(113286):
             st=time.time()
             color_image=np.float32(scipy.misc.imread("%s/%08d.jpg"%(imgs_dir, id+1)))/255.0
             if len(color_image.shape)==2:
@@ -239,7 +238,7 @@ if is_training:
             print("Image iter: %d %d || RankDiv: %.4f %.4f|| Bi: %.4f %.4f || Time: %.4f"%(epoch,cnt,crt_RDLoss,all_RD/cnt,crt_BiLoss,all_Bi/cnt,time.time()-st))
             if cnt>=max_image_step:
                 break
-
+ 
         # Video VCN(Video Colorization Network)
         cnt=0
         all_D1, all_D2, all_B1, all_B2, all_T, all_loss = 0,0,0,0,0,0
@@ -285,14 +284,17 @@ if is_training:
         # Validation
         if not os.path.isdir("%s/%04d"%(model,epoch)):
             os.makedirs("%s/%04d"%(model,epoch))
-
+        print('model save 시작') 
+        saver.save(sess,"%s/model.ckpt"%model,write_meta_graph=False)
+        print('epoch 끝나고 model save')
         if epoch % save_freq == 0:
+            saver.save(sess,"%s/%04d/model.ckpt"%(model,epoch), write_meta_graph=False)
             numtest=len(test_low)
             all_loss_test=np.zeros(numtest, dtype=float)
-            for ind in range(numtest):
+            for ind in range(numtest-1):
                 if ind>30 and epoch%25>0:
                     break
-                input_image_src, input_image_target, input_flow_forward_src, input_flow_backward_src = prepare_input_w_flow(test_low[int(ind*60/pow(60,int(epoch%25==0)))],num_frames=num_frame)
+                input_image_src, input_image_target, input_flow_forward_src, input_flow_backward_src = prepare_input_w_flow(test_low[ind],num_frames=num_frame)
                 if input_image_src is None or input_image_target is None or input_flow_forward_src is None:
                     print("Not able to read the images/flows.")
                     flag=True
@@ -303,7 +305,7 @@ if is_training:
                 C0_imall,C1_imall,C0_im, C1_im=sess.run([objDict["prediction_0"],objDict["prediction_1"],C0, C1],feed_dict={input_i:input_image_src,
                     input_target:input_image_target})
                 print("test time for %s --> %.3f"%(ind, time.time()-st))
-                input_image_src, input_image_target, gray_flow_forward_src, gray_flow_backward_src = prepare_input_w_flow(test_low[int(ind*60/pow(60,int(epoch%25==0)))],num_frames=num_frame)
+                input_image_src, input_image_target, gray_flow_forward_src, gray_flow_backward_src = prepare_input_w_flow(test_low[ind],num_frames=num_frame)
                 h,w = C0_im.shape[1:3]
                 outputs= []
                 for ref_i in range(4):
@@ -320,9 +322,7 @@ if is_training:
                 sic.imsave("%s/%04d/predictions/mask_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(np.concatenate([out_cmap_C[0],out_cmap_X[0],out_low_conf_mask[0]],axis=1)* 255.0,255.0),0.0)))
                 sic.imsave("%s/%04d/predictions/final_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(output[0] * 255.0,255.0),0.0)))
                 sic.imsave("%s/%04d/predictions/predictions_%06d.jpg"%(model, epoch, ind),np.uint8(np.maximum(np.minimum(C0_imall[0] * 255.0,255.0),0.0)))
-                
-            saver.save(sess,"%s/model.ckpt"%model)
-            saver.save(sess,"%s/%04d/model.ckpt"%(model,epoch))
+
 
 # Inference
 else:
