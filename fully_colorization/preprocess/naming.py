@@ -2,8 +2,8 @@ import os, cv2, sys
 sys.path.append('..')
 from pytorch_pwc.utils import get_names
 
-all_dir = '../data/DAVIS/JPEGImages/480p'
-store_dir = '../data/DAVIS/frames'
+all_dir = '../data/train2017'
+store_dir = '../data/coco'
 os.makedirs(store_dir, exist_ok=True)
 
 '''
@@ -24,5 +24,5 @@ image_names = get_names(os.path.join(all_dir))
 for i, img_name in enumerate(image_names):
     img = cv2.imread(img_name)
     if i % 1000 == 0:
-        print(os.path.join(store_dir, i))
+        print(store_dir, i)
     cv2.imwrite(os.path.join(store_dir, '%08d.jpg'%i), img)

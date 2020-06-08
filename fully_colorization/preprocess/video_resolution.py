@@ -17,13 +17,14 @@ def extract_video_frames(input_path, index, args):
     subprocess.run(
         [
             "ffmpeg",
+            "-r", '30',
             "-i",
             "{}".format(path.as_posix()),
             "-vf",
             "scale=832:480",
             "{}".format(
                 Path(os.path.join(args.output_path, "{:03}.mp4").format(index))
-            ),
+            ),"-y"
         ]
     )
 
@@ -37,7 +38,7 @@ def parse_args(args):
         type=str,
         required=True,
     )
-    ar_parser.add_argument("--output-path", default="data/scale_video", type=str, help "Path to output")
+    arg_parser.add_argument("--output-path", default="data/scale_video", type=str, help="Path to output")
     return arg_parser.parse_args(args)
 
 

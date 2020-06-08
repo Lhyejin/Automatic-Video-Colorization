@@ -1,13 +1,14 @@
 name: color
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - python=3.6.9
   - cudatoolkit=10.0
   - psutil
   - opencv=3.4.2
   - pyyaml>=5.1
-  - pillow<7.0
+  - pillow=6.2.0
   - pip
   - pip:
     - tensorflow-gpu==2.0.0
@@ -16,3 +17,4 @@ dependencies:
     - scipy==1.1.0
     - requests    
     - pypng
+    - ffmpeg

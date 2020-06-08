@@ -10,9 +10,7 @@ from pytorch_pwc.utils import get_names
 def extract_video_frames(input_path, output_path):
     path = Path(input_path)
 
-    frames_dir = os.path.join(path.parent, output_path)
     # Make a folder for the frames, if the folder does not already exist
-    os.makedirs(frames_dir, exist_ok=True)
 
     subprocess.run(
         [
@@ -20,7 +18,7 @@ def extract_video_frames(input_path, output_path):
             "-i",
             "{}".format(path.as_posix()),
             "{}".format(
-                Path(os.path.join(frames_dir, path.stem + "_%06d.jpg")).as_posix()
+                Path(os.path.join(output_path, path.stem + "_%06d.jpg")).as_posix()
             ),
         ]
     )
@@ -47,6 +45,7 @@ def parse_args(args):
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
+    os.makedirs(args.output_path, exist_ok=True)
     files = get_names(args.input_path)
     for file_path in files:
         extract_video_frames(file_path, args.output_path)
