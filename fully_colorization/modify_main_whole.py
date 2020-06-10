@@ -106,7 +106,7 @@ train_low=utils.read_image_path(train_root)
 test_low=utils.read_image_path(test_root)
 print('test_low',test_low)
 
-input_idx=tf.compat.v1.placeholder(tf.int32,shape=[None,5*num_frame])
+input_idx=tf.compat.v1.placeholder(tf.int32,shape=[None,knn_k*num_frame])
 input_i=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,1*num_frame])
 input_target=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,3*num_frame])
 input_flow_forward=tf.compat.v1.placeholder(tf.float32,shape=[None,None,None,2*(num_frame-1)])
@@ -140,8 +140,8 @@ with tf.compat.v1.variable_scope(tf.compat.v1.get_variable_scope()):
     lossDict["RankDiv_im2"]=loss.RankDiverse_loss(C1, tf.tile(input_target[:,:,:,3:6], [1,1,1,div_num]),div_num)
     lossDict["RankDiv"]=lossDict["RankDiv_im1"]+lossDict["RankDiv_im2"]
 
-    lossDict['Bilateral_im1']= sum([loss.KNN_loss(C0[:,:,:,3*i:3*i+3], input_idx[:,0:5]) for i in range(4)])
-    lossDict['Bilateral_im2']= sum([loss.KNN_loss(C1[:,:,:,3*i:3*i+3], input_idx[:,5:10])for i in range(4)])
+    lossDict['Bilateral_im1']= sum([loss.KNN_loss(C0[:,:,:,3*i:3*i+3], input_idx[:,0:knn_k]) for i in range(4)])
+    lossDict['Bilateral_im2']= sum([loss.KNN_loss(C1[:,:,:,3*i:3*i+3], input_idx[:,knn_k:knn_k*2])for i in range(4)])
     lossDict['Bilateral']= lossDict['Bilateral_im2'] + lossDict['Bilateral_im1']
 
 
