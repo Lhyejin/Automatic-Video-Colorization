@@ -3,7 +3,7 @@ import math
 import cv2
 import pandas as pd
 import glob
-
+import argparse
 def psnr (original, colorized) :
     mse = numpy.mean((original-colorized)**2)
     if mse == 0 :
@@ -13,11 +13,19 @@ def psnr (original, colorized) :
 
 #원본 이미지(ground truth)들이 모여있는 폴더 path 지정(해당 path에는 이미지만 있어야함)
 # 끝에 /* 꼭 붙이기
-original_path = "/workspace/urop/Automatic-Video-Colorization/fully_colorization/data/test/frames/*"
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--original", default='./data/test/', type=str)
+parser.add_argument("--color", default='./model/0100/001/prediction0', type=str, help="Test dir path")
+parser.add_argument("--output", default='result', type=str)
+args = parser.parse_args()
+print(args)
+original_path = args.original
 
 #모듈을 통과한 이미지들이 모여있는 폴더 path 지정(해당 path에는 이미지만 있어야함)
 # 끝에 /* 꼭 붙이기
-colorized_path = "./Result_whole/frames/predictions0/*"
+colorized_path = args.color
 
 #original 이미지가 모여 있는 폴더에서 사진들 이름 다 불러오기
 original_list = glob.glob(original_path)
@@ -44,4 +52,4 @@ data = {'original' : original_list,
 df = pd.DataFrame(data)
 
 #csv에 저장
-df.to_csv("result.csv", mode='w')
+df.to_csv("%s.csv"%(args.output), mode='w')

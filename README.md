@@ -4,9 +4,11 @@
 ### Requirements
 cuda 10.0, tensorflow 2.0 etc.
 
-more information in fully_colorization folder
+more information in /fully_colorization
 
-
+### TODO
+- [ ] Modify readme.md
+- [ ] Add Comment of all files
 
 
 
