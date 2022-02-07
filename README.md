@@ -12,14 +12,6 @@ more information in /fully_colorization
 
 
 
-### Citation
+### Reference
 original code : https://github.com/ChenyangLEI/Fully-Automatic-Video-Colorization-with-Self-Regularization-and-Diversity
-```
-@InProceedings{Lei_2019_CVPR,
-author = {Lei, Chenyang and Chen, Qifeng},
-title = {Fully Automatic Video Colorization With Self-Regularization and Diversity},
-booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-month = {June},
-year = {2019}
-}
-```
+
